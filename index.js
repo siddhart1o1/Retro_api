@@ -20,14 +20,32 @@ mongoose
   .then(() => console.log("Database connected!"))
   .catch((err) => console.log(err));
 
+
+
+// APIS
 app.get("/", (req, res) => {
   res.send("RETRO APIS");
 });
+
+
+
+
+// routes -----------------------------
 app.use("/api/products", productsRoute);
 app.use("/api/user", userRoute);
+// routes -----------------------------
+
+
+
+
+
 app.get("*", function (req, res, next) {
   res.status(404).send("Sorry can't find that!");
 });
+// APIS
+
+
+
 PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Our app is running on port ${PORT}`);

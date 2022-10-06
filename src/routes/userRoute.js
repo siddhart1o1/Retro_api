@@ -54,6 +54,7 @@ router.post("/login", async (req, res) => {
           country: user.country,
           city: user.city,
           accessToken: accessToken,
+          likedProducts: user.likedProducts,
         });
       } else {
         res.status(400).json("Wrong password");
