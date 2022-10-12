@@ -1,9 +1,11 @@
+const router = require("express").Router();
 const Product = require("../models/Product");
 const User = require("../models/User");
 const Chat = require("../models/Chat");
 const Messages = require("../models/Messages");
-const router = require("express").Router();
 const authorisation = require("./authorisationRoute");
+const { json } = require("body-parser");
+require("dotenv").config();
 
 // Create a new chat
 router.post("/", authorisation, async (req, res) => {
