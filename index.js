@@ -3,12 +3,11 @@ const mongoose = require("mongoose");
 const app = express();
 const productsRoute = require("./src/routes/productsRoute");
 const userRoute = require("./src/routes/userRoute");
-const ChatRoute = require("./src/routes/ChatRoutes");
+const chatRoute = require("./src/routes/chatRoutes");
+require("dotenv").config();
 
 var cors = require("cors");
 var morgan = require("morgan");
-require("dotenv").config();
-
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
@@ -29,7 +28,7 @@ app.get("/", (req, res) => {
 // routes -----------------------------
 app.use("/api/products", productsRoute);
 app.use("/api/user", userRoute);
-app.use("/api/chat", ChatRoute);
+app.use("/api/chat", chatRoute);
 // routes -----------------------------
 
 app.get("*", function (req, res, next) {
