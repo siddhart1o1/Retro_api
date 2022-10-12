@@ -4,32 +4,8 @@ const User = require("../models/User");
 const Chat = require("../models/Chat");
 const Messages = require("../models/Messages");
 const authorisation = require("./authorisationRoute");
-const { json } = require("body-parser");
 require("dotenv").config();
 
-// Create a new chat
-router.post("/", authorisation, async (req, res) => {
-  console.log("req.body", req.body);
-  let ChatData = await Chat.findOne({
-    members: { $all: [req.user._id, req.body.receiverId] },
-    product: req.body.productId,
-  });
-  if (ChatData) {
-    return res.status(200).json(ChatData);
-  } else {
-    ChatData = {
-      members: [req.user._id, req.body.receiverId],
-      product: req.body.productId,
-    };
-    const newChat = new Chat(ChatData);
-    try {
-      const savedChat = await newChat.save();
-      res.status(200).json(savedChat);
-    } catch (err) {
-      res.status(500).json(err);
-    }
-  }
-});
 
 router.get("/getchat/:id", authorisation, async (req, res) => {
   const chatId = req.params.id;
@@ -55,6 +31,7 @@ router.post("/message/:chatId", authorisation, async (req, res) => {
     res.status(500).json(err);
   }
 });
+
 
 //send message
 router.post("/message", authorisation, async (req, res) => {
@@ -99,5 +76,33 @@ router.get("/userchats", authorisation, async (req, res) => {
     res.status(500).json(err);
   }
 });
+
+
+// Create a new chat
+router.post("/", authorisation, async (req, res) => {
+  console.log("req.body", req.body);
+  let ChatData = await Chat.findOne({
+    members: { $all: [req.user._id, req.body.receiverId] },
+    product: req.body.productId,
+  });
+  if (ChatData) {
+    return res.status(200).json(ChatData);
+  } else {
+    ChatData = {
+      members: [req.user._id, req.body.receiverId],
+      product: req.body.productId,
+    };
+    const newChat = new Chat(ChatData);
+    try {
+      const savedChat = await newChat.save();
+      res.status(200).json(savedChat);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+});
+
+
+
 
 module.exports = router;

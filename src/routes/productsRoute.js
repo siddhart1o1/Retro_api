@@ -6,6 +6,54 @@ const User = require("../models/User");
 const authorisation = require("./authorisationRoute");
 require("dotenv").config();
 
+
+
+
+
+
+router.get("/user/liked", authorisation, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const products = await Product.find({ _id: { $in: user.likedProducts } });
+    res.status(200).json(products);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// get user products
+router.get("/user/products", authorisation, async (req, res) => {
+  try {
+    const userProducts = await Product.find({ user: req.user._id });
+    res.status(200).json(userProducts);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+router.put("/like/:id", authorisation, async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product.likes.includes(req.user._id)) {
+      await product.updateOne({ $push: { likes: req.user._id } });
+      await User.findByIdAndUpdate(req.user._id, {
+        $push: { likedProducts: product._id },
+      });
+
+      res.status(200).json("The product has been liked");
+    } else {
+      await product.updateOne({ $pull: { likes: req.user._id } });
+      await User.findByIdAndUpdate(req.user._id, {
+        $pull: { likedProducts: product._id },
+      });
+
+      res.status(200).json("The product has been disliked");
+    }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 //search products
 router.get("/search", async (req, res) => {
   const query = req.query.query;
@@ -22,6 +70,36 @@ router.get("/search", async (req, res) => {
     } catch (err) {
       res.status(500).json(err);
     }
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    const user = await User.findById(product.user._id);
+    product.user = user;
+    res.status(200).json(
+      product
+      // user: user,
+    );
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+});
+
+// update product
+router.put("/:id", authorisation, async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (product.user === req.user._id) {
+      await product.updateOne({ $set: req.body });
+      res.status(200).json("Product has been updated");
+    } else {
+      res.status(403).json("You can update only your product");
+    }
+  } catch (err) {
+    res.status(500).json(err);
   }
 });
 
@@ -81,80 +159,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// get product by id
-router.get("/:id", async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    const user = await User.findById(product.user._id);
-    product.user = user;
-    res.status(200).json(
-      product
-      // user: user,
-    );
-  } catch (err) {
-    console.log(err);
-    res.status(500).json(err);
-  }
-});
 
-// update product
-router.put("/:id", authorisation, async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (product.user === req.user._id) {
-      await product.updateOne({ $set: req.body });
-      res.status(200).json("Product has been updated");
-    } else {
-      res.status(403).json("You can update only your product");
-    }
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
-
-// like product
-router.put("/like/:id", authorisation, async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product.likes.includes(req.user._id)) {
-      await product.updateOne({ $push: { likes: req.user._id } });
-      await User.findByIdAndUpdate(req.user._id, {
-        $push: { likedProducts: product._id },
-      });
-
-      res.status(200).json("The product has been liked");
-    } else {
-      await product.updateOne({ $pull: { likes: req.user._id } });
-      await User.findByIdAndUpdate(req.user._id, {
-        $pull: { likedProducts: product._id },
-      });
-
-      res.status(200).json("The product has been disliked");
-    }
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
-
-// get liked product
-router.get("/user/liked", authorisation, async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id);
-    const products = await Product.find({ _id: { $in: user.likedProducts } });
-    res.status(200).json(products);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
-
-// get user products
-router.get("/user/products", authorisation, async (req, res) => {
-  try {
-    const userProducts = await Product.find({ user: req.user._id });
-    res.status(200).json(userProducts);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
 
 module.exports = router;
