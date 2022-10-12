@@ -14,7 +14,7 @@ const authorisation = async (req, res, next) => {
       const verified = jwt.verify(token, process.env.ACCESS_TOKEN);
       req.user = verified;
       console.log("verified");
-      return next();
+      next();
     } catch (err) {
       return res.status(400).send("Invalid Token");
     }

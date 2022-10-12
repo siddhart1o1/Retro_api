@@ -1,16 +1,21 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
-const productsRoute = require("./src/routes/productsRoute");
-const userRoute = require("./src/routes/userRoute");
-const chatRoute = require("./src/routes/chatRoutes");
-require("dotenv").config();
-
 var cors = require("cors");
 var morgan = require("morgan");
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+const productsRoute = require("./src/routes/productsRoute");
+const userRoute = require("./src/routes/userRoute");
+const chatRoute = require("./src/routes/chatRoutes");
+require("dotenv").config();
+
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
+}
+
 
 mongoose
   .connect(process.env.MONGO_URL, {
@@ -31,10 +36,13 @@ app.use("/api/user", userRoute);
 app.use("/api/chat", chatRoute);
 // routes -----------------------------
 
-app.get("*", function (req, res, next) {
-  res.status(404).send("Sorry can't find that!");
+app.get("*", (request, response) => {
+  response.sendFile(path.join(__dirname, "client/build", "index.html"));
 });
 // APIS
+
+
+
 
 PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
