@@ -6,6 +6,25 @@ const User = require("../models/User");
 const authorisation = require("./authorisationRoute");
 require("dotenv").config();
 
+//search products
+router.get("/search", async (req, res) => {
+  const query = req.query.query;
+  console.log(query);
+  if (query) {
+    try {
+      const products = await Product.find({
+        $or: [
+          { name: { $regex: query, $options: "i" } },
+          { category: { $regex: query, $options: "i" } },
+        ],
+      });
+      res.status(200).json(products);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+});
+
 // mew products
 router.post("/", authorisation, async (req, res) => {
   console.log("post product  ----------");
@@ -67,27 +86,13 @@ router.get("/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     const user = await User.findById(product.user._id);
-    product.userData = { name: user.name, email: user.email };
+    product.user = user;
     res.status(200).json(
       product
       // user: user,
     );
   } catch (err) {
     console.log(err);
-    res.status(500).json(err);
-  }
-});
-
-// get user products
-router.get("/user/:user", authorisation, async (req, res) => {
-  try {
-    if (req.params.user !== req.user._id) {
-      return res.status(403).json("You can see only your products");
-    } else {
-      const products = await Product.find({ user: req.params.user });
-    }
-    res.status(200).json(products);
-  } catch (err) {
     res.status(500).json(err);
   }
 });
@@ -126,6 +131,27 @@ router.put("/like/:id", authorisation, async (req, res) => {
 
       res.status(200).json("The product has been disliked");
     }
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// get liked product
+router.get("/user/liked", authorisation, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const products = await Product.find({ _id: { $in: user.likedProducts } });
+    res.status(200).json(products);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// get user products
+router.get("/user/products", authorisation, async (req, res) => {
+  try {
+    const userProducts = await Product.find({ user: req.user._id });
+    res.status(200).json(userProducts);
   } catch (err) {
     res.status(500).json(err);
   }

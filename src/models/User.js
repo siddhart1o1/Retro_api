@@ -12,6 +12,7 @@ const UserSchema = new mongoose.Schema(
     likedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
+    avatar: { type: String },
   },
   { timestamps: true }
 );

@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const app = express();
 const productsRoute = require("./src/routes/productsRoute");
 const userRoute = require("./src/routes/userRoute");
+const ChatRoute = require("./src/routes/ChatRoutes");
 
 var cors = require("cors");
 var morgan = require("morgan");
@@ -20,31 +21,21 @@ mongoose
   .then(() => console.log("Database connected!"))
   .catch((err) => console.log(err));
 
-
-
 // APIS
 app.get("/", (req, res) => {
   res.send("RETRO APIS");
 });
 
-
-
-
 // routes -----------------------------
 app.use("/api/products", productsRoute);
 app.use("/api/user", userRoute);
+app.use("/api/chat", ChatRoute);
 // routes -----------------------------
-
-
-
-
 
 app.get("*", function (req, res, next) {
   res.status(404).send("Sorry can't find that!");
 });
 // APIS
-
-
 
 PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
